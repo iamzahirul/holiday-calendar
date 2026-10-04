@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>বাংলাদেশ ছুটির ক্যালেন্ডার · কত দিন বাকি?</title>
+<meta name="description" content="বাংলাদেশের সরকারি ছুটির পূর্ণ তালিকা — পরবর্তী ছুটির কাউন্টডাউন, ঈদ-পূজা-বড়দিন সব, ক্যালেন্ডারে (.ics) এক্সপোর্ট। সম্পূর্ণ অফলাইন।">
+<style>
+  :root{
+    --bg:#050812;--card:#0c1220;--card-border:#1c2740;--text:#e8edf8;
+    --muted:#8b98b8;--green:#00a676;--green-2:#00c98f;--red:#f42a41;
+    --gold:#f5c04a;--blue:#5aa7ff;--pink:#ff7ab8;--purple:#b78aff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:radial-gradient(1100px 500px at 50% -10%,#1a1207 0%,var(--bg) 55%);
+    color:var(--text);min-height:100vh;
+    font-family:'Noto Sans Bengali','Hind Siliguri','SolaimanLipi',system-ui,sans-serif;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:28px 16px 60px}
+  header{text-align:center;margin-bottom:22px}
+  .badge{
+    display:inline-block;font-size:12.5px;color:var(--gold);
+    border:1px solid rgba(245,192,74,.4);border-radius:999px;padding:4px 14px;margin-bottom:12px;
+    background:rgba(245,192,74,.08);letter-spacing:.3px;
+  }
+  h1{font-size:clamp(25px,5vw,36px);font-weight:800;line-height:1.3}
+  .sub{color:var(--muted);font-size:14.5px;margin-top:8px;line-height:1.7}
+
+  .hero{
+    background:linear-gradient(135deg,rgba(245,192,74,.1),rgba(0,166,118,.07));
+    border:1px solid rgba(245,192,74,.3);border-radius:18px;padding:22px;margin-bottom:16px;
+    display:flex;gap:20px;align-items:center;flex-wrap:wrap;
+  }
+  .hero .left{flex:1;min-width:220px}
+  .hero .lbl{font-size:12px;color:var(--gold);letter-spacing:1.5px;font-weight:700}
+  .hero .nm{font-size:clamp(22px,4vw,30px);font-weight:800;margin-top:4px}
+  .hero .dt{color:var(--muted);font-size:14.5px;margin-top:4px}
+  .daysbox{text-align:center;background:#080d18;border:1px solid var(--card-border);border-radius:14px;padding:14px 22px}
+  .daysbox .num{font-size:38px;font-weight:800;color:var(--gold);line-height:1.1}
+  .daysbox .cap{font-size:12.5px;color:var(--muted)}
+  .copy-mini{
+    font-family:inherit;font-size:12.5px;color:var(--muted);background:transparent;
+    border:1px solid var(--card-border);border-radius:8px;padding:5px 12px;cursor:pointer;transition:all .15s;margin-top:10px;
+  }
+  .copy-mini:hover{color:var(--gold);border-color:var(--gold)}
+  .copy-mini.done{color:var(--gold);border-color:var(--gold)}
+
+  .toolbar{
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;
+    background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px 14px;
+  }
+  .tabs{display:flex;gap:6px}
+  .tab{
+    font-family:inherit;font-size:14px;font-weight:700;color:var(--muted);background:#080d18;
+    border:1px solid var(--card-border);border-radius:10px;padding:7px 18px;cursor:pointer;transition:all .15s;
+  }
+  .tab.active{color:#04120d;background:var(--green-2);border-color:var(--green-2)}
+  #q{
+    flex:1;min-width:150px;background:#080d18;color:var(--text);border:1px solid var(--card-border);
+    border-radius:10px;padding:8px 13px;font-family:inherit;font-size:14.5px;outline:none;
+  }
+  #q:focus{border-color:var(--gold)}
+  .ics-btn{
+    font-family:inherit;font-size:13px;color:var(--green-2);background:rgba(0,166,118,.1);
+    border:1px solid rgba(0,166,118,.4);border-radius:10px;padding:8px 14px;cursor:pointer;transition:all .15s;
+  }
+  .ics-btn:hover{background:rgba(0,166,118,.2)}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .chip{
+    font-family:inherit;font-size:12.5px;color:var(--muted);background:#080d18;
+    border:1px solid var(--card-border);border-radius:999px;padding:5px 13px;cursor:pointer;transition:all .15s;
+  }
+  .chip.active{color:#241a02;background:var(--gold);border-color:var(--gold);font-weight:700}
+  .stats{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.8}
+  .stats b{color:var(--gold)}
+
+  .month-h{font-size:15px;font-weight:700;color:var(--gold);margin:18px 2px 8px;display:flex;align-items:center;gap:10px}
+  .month-h::after{content:'';flex:1;height:1px;background:var(--card-border)}
+  .holi{
+    background:var(--card);border:1px solid var(--card-border);border-radius:13px;
+    padding:13px 16px;margin-bottom:9px;display:flex;gap:14px;align-items:center;transition:border-color .15s;
+  }
+  .holi:hover{border-color:#2c3d63}
+  .holi.past{opacity:.5}
+  .holi.today{border-color:var(--gold);box-shadow:0 0 0 1px rgba(245,192,74,.3)}
+  .datebox{
+    flex-shrink:0;width:58px;text-align:center;background:#080d18;border:1px solid var(--card-border);
+    border-radius:11px;padding:7px 4px;
+  }
+  .datebox .d{font-size:21px;font-weight:800;line-height:1.2}
+  .datebox .w{font-size:11px;color:var(--muted)}
+  .datebox.wknd .d{color:var(--green-2)}
+  .info{flex:1;min-width:0}
+  .info .n{font-size:16px;font-weight:700;line-height:1.5}
+  .info .x{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .t{font-size:11px;border-radius:6px;padding:2px 8px;border:1px solid;white-space:nowrap}
+  .t.nat{color:var(--green-2);border-color:rgba(0,201,143,.4);background:rgba(0,166,118,.08)}
+  .t.rel{color:var(--gold);border-color:rgba(245,192,74,.4);background:rgba(245,192,74,.08)}
+  .t.int{color:var(--blue);border-color:rgba(90,167,255,.4);background:rgba(90,167,255,.08)}
+  .t.exe{color:var(--muted);border-color:var(--card-border);background:#080d18}
+  .t.gen{color:var(--pink);border-color:rgba(255,122,184,.35);background:rgba(255,122,184,.06)}
+  .t.app{color:var(--purple);border-color:rgba(183,138,255,.4);background:rgba(183,138,255,.08)}
+  .left-chip{flex-shrink:0;font-size:12.5px;color:var(--gold);background:rgba(245,192,74,.08);border:1px solid rgba(245,192,74,.25);border-radius:999px;padding:4px 11px;white-space:nowrap}
+  .left-chip.past{color:var(--muted);background:#080d18;border-color:var(--card-border)}
+  .left-chip.today{color:#241a02;background:var(--gold);border-color:var(--gold);font-weight:700}
+  .empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:15px;line-height:2}
+  .note{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.8;text-align:center}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:30px;line-height:1.9}
+  footer a{color:var(--green-2);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">Day 6 of 100 · সম্পূর্ণ অফলাইন · .ics এক্সপোর্ট</span>
+    <h1>🇧🇩 বাংলাদেশ ছুটির ক্যালেন্ডার</h1>
+    <p class="sub">সরকারি ছুটির পূর্ণ তালিকা · পরবর্তী ছুটি কবে, কত দিন বাকি — এক নজরেই</p>
+  </header>
+
+  <div class="hero" id="hero">
+    <div class="left">
+      <div class="lbl">⏳ পরবর্তী সরকারি ছুটি</div>
+      <div class="nm" id="h-name">—</div>
+      <div class="dt" id="h-date"></div>
+      <button class="copy-mini" id="h-copy" onclick="copyNext()">📋 কাউন্টডাউন কপি করুন</button>
+    </div>
+    <div class="daysbox">
+      <div class="num" id="h-days">—</div>
+      <div class="cap">দিন বাকি</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="tabs">
+      <button class="tab active" data-y="2026" onclick="setYear(this)">২০২৬</button>
+      <button class="tab" data-y="2027" onclick="setYear(this)">২০২৭</button>
+    </div>
+    <input id="q" type="text" placeholder="ছুটি খুঁজুন… যেমন: ঈদ, পূজা" autocomplete="off">
+    <button class="ics-btn" onclick="exportICS()">📅 ক্যালেন্ডারে নিন (.ics)</button>
+  </div>
+
+  <div class="filters">
+    <button class="chip active" data-c="all" onclick="setCat(this)">সব</button>
+    <button class="chip" data-c="national" onclick="setCat(this)">🇧🇩 জাতীয়</button>
+    <button class="chip" data-c="religious" onclick="setCat(this)">🕌 ধর্মীয়</button>
+    <button class="chip" data-c="international" onclick="setCat(this)">🌍 আন্তর্জাতিক</button>
+    <button class="chip" data-c="special" onclick="setCat(this)">⭐ বিশেষ</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div id="list"></div>
+  <div class="note">
+    চাঁদ-নির্ভর ছুটির (ঈদ, শবে বরাত ইত্যাদি) তারিখ চাঁদ দেখা সাপেক্ষে ১ দিন এদিক-ওদিক হতে পারে।
+    ২০২৭-এর চন্দ্র-নির্ভর তারিখগুলো <b>আনুমানিক</b>। সাধারণত তালিকা সরকারি গেজেট অনুসরণ করে।
+  </div>
+
+  <footer>
+    Day 6 of 100 · Built in public by <a href="https://github.com/iamzahirul" target="_blank" rel="noopener">Rasel (@iamzahirul)</a><br>
+    <span style="opacity:.75">🔒 সবকিছু আপনার ব্রাউজারেই — কোনো ডাটা কোথাও যায় না</span>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   বাংলাদেশ সরকারি ছুটি — ডাটা (২০২৬ গেজেট-ভিত্তিক, ২০২৭ আনুমানিক)
+   c: ক্যাটাগরি · t: সাধারণ/নির্বাহী · a: আনুমানিক? · r: ধর্ম/বিষয়
+   ============================================================ */
+const H = [
+/* ---------------- ২০২৬ ---------------- */
+{d:'2026-02-04', n:'শবে বরাত', c:'religious', t:'নির্বাহী', r:'ইসলাম'},
+{d:'2026-02-12', n:'জাতীয় সংসদ নির্বাচন ও গণভোট', c:'special', t:'এককালীন', r:'রাষ্ট্রীয়'},
+{d:'2026-02-21', n:'শহীদ দিবস ও আন্তর্জাতিক মাতৃভাষা দিবস', c:'national', t:'সাধারণ', r:'জাতীয়'},
+{d:'2026-03-17', n:'শবে কদর', c:'religious', t:'নির্বাহী', r:'ইসলাম'},
+{d:'2026-03-19', n:'ঈদুল ফিতর ছুটি', c:'religious', t:'সাধারণ', r:'ইসলাম'},
+{d:'2026-03-20', n:'জুমাতুল বিদা', c:'religious', t:'সাধারণ', r:'ইসলাম'},
+{d:'2026-03-21', n:'ঈদুল ফিতর', c:'religious', t:'সাধারণ', r:'ইসলাম', main:true},
+{d:'2026-03-22', n:'ঈদুল ফিতর ছুটি', c:'religious', t:'সাধারণ', r:'ইসলাম'},
+{d:'2026-03-23', n:'ঈদুল ফিতর ছুটি', c:'religious', t:'নির্বাহী', r:'ইসলাম'},
+{d:'2026-03-26', n:'স্বাধীনতা দিবস', c:'national', t:'সাধারণ', r:'জাতীয়'},
+{d:'2026-04-14', n:'পহেলা বৈশাখ (বাংলা নববর্ষ)', c:'national', t:'সাধারণ', r:'বাংলা বর্ষবর্ষ'},
+{d:'2026-05-01', n:'মে দিবস (শ্রমিক দিবস)', c:'international', t:'সাধারণ', r:'আন্তর্জাতিক'},
+{d:'2026-05-01', n:'বুদ্ধ পূর্ণিমা', c:'religious', t:'সাধারণ', r:'বৌদ্ধ'},
+{d:'2026-05-25', n:'ঈদুল আজহা ছুটি', c:'religious', t:'নির্বাহী', r:'ইসলাম'},
+{d:'2026-05-26', n:'ঈদুল আজহা ছুটি', c:'religious', t:'নির্বাহী', r:'ইসলাম'},
+{d:'2026-05-27', n:'ঈদুল আজহা', c:'religious', t:'সাধারণ', r:'ইসলাম', main:true},
+{d:'2026-05-28', n:'ঈদুল আজহা ছুটি', c:'religious', t:'সাধারণ', r:'ইসলাম'},
+{d:'2026-05-29', n:'ঈদুল আজহা ছুটি', c:'religious', t:'সাধারণ', r:'ইসলাম'},
+{d:'2026-05-30', n:'ঈদুল আজহা ছুটি', c:'religious', t:'নির্বাহী', r:'ইসলাম'},
+{d:'2026-05-31', n:'ঈদুল আজহা ছুটি', c:'religious', t:'নির্বাহী', r:'ইসলাম'},
+{d:'2026-06-26', n:'আশুরা', c:'religious', t:'নির্বাহী', r:'ইসলাম'},
+{d:'2026-08-05', n:'জুলাই গণঅভ্যুত্থান দিবস', c:'national', t:'সাধারণ', r:'জাতীয়'},
+{d:'2026-08-26', n:'ঈদে মিলাদুন্নবী (সা.)', c:'religious', t:'সাধারণ', r:'ইসলাম'},
+{d:'2026-09-04', n:'শুভ জন্মাষ্টমী', c:'religious', t:'সাধারণ', r:'হিন্দু'},
+{d:'2026-10-20', n:'দুর্গাপূজা (নবমী)', c:'religious', t:'সাধারণ', r:'হিন্দু'},
+{d:'2026-10-21', n:'বিজয়া দশমী', c:'religious', t:'সাধারণ', r:'হিন্দু'},
+{d:'2026-12-16', n:'বিজয় দিবস', c:'national', t:'সাধারণ', r:'জাতীয়'},
+{d:'2026-12-25', n:'বড়দিন (যীশু খ্রিস্টের জন্মদিন)', c:'religious', t:'সাধারণ', r:'খ্রিস্টান'},
+/* ---------------- ২০২৭ (আনুমানিক) ---------------- */
+{d:'2027-01-25', n:'শবে বরাত', c:'religious', t:'নির্বাহী', r:'ইসলাম', a:1},
+{d:'2027-02-21', n:'শহীদ দিবস ও আন্তর্জাতিক মাতৃভাষা দিবস', c:'national', t:'সাধারণ', r:'জাতীয়'},
+{d:'2027-03-07', n:'শবে কদর', c:'religious', t:'নির্বাহী', r:'ইসলাম', a:1},
+{d:'2027-03-09', n:'ঈদুল ফিতর ছুটি', c:'religious', t:'সাধারণ', r:'ইসলাম', a:1},
+{d:'2027-03-10', n:'ঈদুল ফিতর', c:'religious', t:'সাধারণ', r:'ইসলাম', main:true, a:1},
+{d:'2027-03-11', n:'ঈদুল ফিতর ছুটি', c:'religious', t:'সাধারণ', r:'ইসলাম', a:1},
+{d:'2027-03-26', n:'স্বাধীনতা দিবস', c:'national', t:'সাধারণ', r:'জাতীয়'},
+{d:'2027-04-14', n:'পহেলা বৈশাখ (বাংলা নববর্ষ)', c:'national', t:'সাধারণ', r:'বাংলা বর্ষবর্ষ'},
+{d:'2027-05-01', n:'মে দিবস (শ্রমিক দিবস)', c:'international', t:'সাধারণ', r:'আন্তর্জাতিক'},
+{d:'2027-05-16', n:'ঈদুল আজহা ছুটি', c:'religious', t:'নির্বাহী', r:'ইসলাম', a:1},
+{d:'2027-05-17', n:'ঈদুল আজহা', c:'religious', t:'সাধারণ', r:'ইসলাম', main:true, a:1},
+{d:'2027-05-18', n:'ঈদুল আজহা ছুটি', c:'religious', t:'নির্বাহী', r:'ইসলাম', a:1},
+{d:'2027-05-20', n:'বুদ্ধ পূর্ণিমা', c:'religious', t:'সাধারণ', r:'বৌদ্ধ', a:1},
+{d:'2027-06-16', n:'আশুরা', c:'religious', t:'নির্বাহী', r:'ইসলাম', a:1},
+{d:'2027-08-05', n:'জুলাই গণঅভ্যুত্থান দিবস', c:'national', t:'সাধারণ', r:'জাতীয়'},
+{d:'2027-08-16', n:'ঈদে মিলাদুন্নবী (সা.)', c:'religious', t:'সাধারণ', r:'ইসলাম', a:1},
+{d:'2027-08-25', n:'শুভ জন্মাষ্টমী', c:'religious', t:'সাধারণ', r:'হিন্দু', a:1},
+{d:'2027-10-08', n:'দুর্গাপূজা (নবমী)', c:'religious', t:'সাধারণ', r:'হিন্দু', a:1},
+{d:'2027-10-09', n:'বিজয়া দশমী', c:'religious', t:'সাধারণ', r:'হিন্দু', a:1},
+{d:'2027-12-16', n:'বিজয় দিবস', c:'national', t:'সাধারণ', r:'জাতীয়'},
+{d:'2027-12-25', n:'বড়দিন (যীশু খ্রিস্টের জন্মদিন)', c:'religious', t:'সাধারণ', r:'খ্রিস্টান'},
+];
+
+const MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+const WEEK = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
+const CAT_BADGE = { national: 'nat', religious: 'rel', international: 'int', special: 'exe' };
+const CAT_NAME = { national: 'জাতীয়', religious: 'ধর্মীয়', international: 'আন্তর্জাতিক', special: 'বিশেষ' };
+
+const $ = id => document.getElementById(id);
+let curYear = String(new Date().getFullYear()) === '2027' ? '2027' : '2026';
+let curCat = 'all';
+
+/* ---------- সহায়ক ---------- */
+function bn(x) { return String(x).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]); }
+function parseD(s) { const p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function todayMid() { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); }
+function daysLeft(dateStr) { return Math.round((parseD(dateStr) - todayMid()) / 86400000); }
+function fmtDate(s) {
+  const d = parseD(s);
+  return bn(d.getDate()) + ' ' + MONTHS[d.getMonth()] + ' ' + bn(d.getFullYear());
+}
+function fmtDateShort(s) {
+  const d = parseD(s);
+  return bn(d.getDate()) + ' ' + MONTHS[d.getMonth()];
+}
+function weekday(s) { return WEEK[parseD(s).getDay()]; }
+function isWknd(s) { const w = parseD(s).getDay(); return w === 5 || w === 6; }
+
+/* পরবর্তী ছুটি (আজ বা ভবিষ্যৎ, সব বছর মিলিয়ে) */
+function nextHoliday() {
+  const cand = H.filter(h => daysLeft(h.d) >= 0).sort((a, b) => a.d < b.d ? -1 : 1);
+  return cand[0] || null;
+}
+
+/* ---------- হিরো ---------- */
+function renderHero() {
+  const nh = nextHoliday();
+  if (!nh) {
+    $('h-name').textContent = 'কোনো আসন্ন ছুটি নেই';
+    $('h-date').textContent = ''; $('h-days').textContent = '—';
+    return;
+  }
+  const left = daysLeft(nh.d);
+  $('h-name').textContent = nh.n;
+  $('h-date').textContent = fmtDate(nh.d) + ' · ' + weekday(nh.d) + (nh.a ? ' · আনুমানিক' : '');
+  $('h-days').textContent = left === 0 ? 'আজ!' : bn(left);
+  $('h-days').parentElement.querySelector('.cap').textContent = left === 0 ? 'শুভ ছুটি 🎉' : 'দিন বাকি';
+}
+
+/* ---------- তালিকা ---------- */
+function renderList() {
+  const q = $('q').value.trim().toLowerCase();
+  const items = H.filter(h => {
+    if (h.d.slice(0, 4) !== curYear) return false;
+    if (curCat !== 'all' && h.c !== curCat) return false;
+    if (q && !(h.n.toLowerCase().includes(q) || h.r.toLowerCase().includes(q))) return false;
+    return true;
+  }).sort((a, b) => a.d < b.d ? -1 : 1);
+
+  if (!items.length) {
+    $('list').innerHTML = '<div class="empty">😔 এই ফিল্টারে কিছু পাওয়া যায়নি।</div>';
+    $('stats').innerHTML = '';
+    return;
+  }
+
+  /* স্ট্যাটস */
+  const yearItems = H.filter(h => h.d.slice(0, 4) === curYear);
+  const uniqDays = new Set(yearItems.map(h => h.d)).size;
+  const upcoming = items.filter(h => daysLeft(h.d) >= 0).length;
+  $('stats').innerHTML = '📊 ' + bn(curYear) + ' সালে মোট <b>' + bn(uniqDays) + ' দিনের</b> সরকারি ছুটি'
+    + (q || curCat !== 'all' ? ' · দেখানো হচ্ছে ' + bn(items.length) + 'টি' : '')
+    + ' · সামনে আছে <b>' + bn(upcoming) + 'টি</b>';
+
+  let html = '', lastMonth = '';
+  for (const h of items) {
+    const d = parseD(h.d), mi = d.getMonth();
+    if (mi !== lastMonth) {
+      html += '<div class="month-h">' + MONTHS[mi] + '</div>';
+      lastMonth = mi;
+    }
+    const left = daysLeft(h.d);
+    const cls = left < 0 ? 'past' : (left === 0 ? 'today' : '');
+    let chip;
+    if (left < 0) chip = '<span class="left-chip past">সম্পন্ন</span>';
+    else if (left === 0) chip = '<span class="left-chip today">আজ! 🎉</span>';
+    else chip = '<span class="left-chip">' + bn(left) + ' দিন বাকি</span>';
+    const apx = h.a ? ' · আনুমানিক' : '';
+    html += '<div class="holi ' + cls + '">'
+      + '<div class="datebox' + (isWknd(h.d) ? ' wknd' : '') + '"><div class="d">' + bn(d.getDate()) + '</div><div class="w">' + weekday(h.d).replace('বার', '') + '</div></div>'
+      + '<div class="info"><div class="n">' + esc(h.n) + (h.main ? ' ⭐' : '') + '</div>'
+      + '<div class="x">' + fmtDate(h.d) + ' · ' + weekday(h.d) + apx + '</div>'
+      + '<div class="tags"><span class="t ' + CAT_BADGE[h.c] + '">' + CAT_NAME[h.c] + '</span>'
+      + '<span class="t ' + (h.t === 'সাধারণ' ? 'gen' : 'exe') + '">' + h.t + '</span>'
+      + '<span class="t rel">' + esc(h.r) + '</span></div></div>'
+      + chip + '</div>';
+  }
+  $('list').innerHTML = html;
+}
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+/* ---------- কন্ট্রোল ---------- */
+function setYear(btn) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  curYear = btn.dataset.y;
+  renderList();
+}
+function setCat(btn) {
+  document.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  curCat = btn.dataset.c;
+  renderList();
+}
+
+/* ---------- কপি ---------- */
+function copyNext() {
+  const nh = nextHoliday();
+  if (!nh) return;
+  const left = daysLeft(nh.d);
+  const text = left === 0
+    ? '🎉 আজ ' + nh.n + '! (' + fmtDate(nh.d) + ')'
+    : '⏳ ' + nh.n + ' — আর মাত্র ' + bn(left) + ' দিন বাকি! (' + fmtDate(nh.d) + ', ' + weekday(nh.d) + ')';
+  const btn = $('h-copy');
+  const done = () => {
+    btn.textContent = '✓ কপি হয়েছে'; btn.classList.add('done');
+    setTimeout(() => { btn.textContent = '📋 কাউন্টডাউন কপি করুন'; btn.classList.remove('done'); }, 1400);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
+  } else { fallbackCopy(text); done(); }
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  ta.remove();
+}
+
+/* ---------- .ics এক্সপোর্ট ---------- */
+function buildICS(year) {
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0',
+    'PRODID:-//iamzahirul//Bangladesh Holidays//bn', 'X-WR-CALNAME:বাংলাদেশ সরকারি ছুটি ' + year];
+  for (const h of H.filter(x => x.d.slice(0, 4) === year)) {
+    const ymd = h.d.replace(/-/g, '');
+    lines.push('BEGIN:VEVENT',
+      'UID:' + ymd + '-' + encodeURIComponent(h.n) + '@iamzahirul.github.io',
+      'DTSTART;VALUE=DATE:' + ymd,
+      'SUMMARY:' + (h.a ? '(আনুমানিক) ' : '') + h.n + (h.main ? ' ⭐' : ''),
+      'DESCRIPTION:' + CAT_NAME[h.c] + ' ছুটি (' + h.t + ') · ' + h.r,
+      'END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+function exportICS() {
+  const blob = new Blob([buildICS(curYear)], { type: 'text/calendar;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'bangladesh-holidays-' + curYear + '.ics';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ---------- init ---------- */
+$('q').addEventListener('input', renderList);
+renderHero();
+renderList();
+</script>
+</body>
+</html>
